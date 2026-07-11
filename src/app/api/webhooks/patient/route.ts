@@ -11,17 +11,39 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     
     const { 
-      phone, 
+      // Accept flexible field names from different automation tools
+      phone,
+      mobile,         // alias
+      whatsapp,       // alias
       name, 
+      full_name,      // alias  
+      customer_name,  // alias
       age, 
       gender, 
-      symptoms, 
+      symptoms,
+      complaint,      // alias
+      issue,          // alias
       medicalHistory,
-      attachments 
+      medical_history, // alias
+      attachments,
+      files,          // alias
+      documents,      // alias
+      // Extra fields passed from automation
+      email,
+      address,
+      notes,
     } = body;
 
+    // Resolve field aliases
+    const resolvedPhone   = phone || mobile || whatsapp;
+    const resolvedName    = name || full_name || customer_name;
+    const resolvedSymptoms = symptoms || complaint || issue;
+    const resolvedHistory  = medicalHistory || medical_history;
+    const resolvedAttachments = attachments || files || documents || [];
+
+
     // Validate required fields
-    if (!phone || !name) {
+    if (!resolvedPhone || !resolvedName) {
       return NextResponse.json(
         { error: 'Missing required fields: phone and name are required.' },
         { status: 400 }
@@ -29,7 +51,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Clean phone number (remove spaces, symbols)
-    const cleanPhone = phone.replace(/[^0-9+]/g, '');
+    const cleanPhone = resolvedPhone.replace(/[^0-9+]/g, '');
 
     // 1. Find or Create Patient
     let patientRecord = await db.query.patients.findFirst({
@@ -37,11 +59,11 @@ export async function POST(request: NextRequest) {
     });
 
     const patientData = {
-      name: name,
+      name: resolvedName,
       phone: cleanPhone,
       age: age ? parseInt(age) : undefined,
       gender: gender || undefined,
-      medicalHistory: medicalHistory || undefined,
+      medicalHistory: resolvedHistory || undefined,
       updatedAt: new Date(),
     };
 
@@ -67,7 +89,7 @@ export async function POST(request: NextRequest) {
     // 2. Create Patient's Google Drive Folder (Folder Name format: "Name (Phone)")
     let driveFolderId: string | undefined;
     try {
-      const folderName = `${name} (${cleanPhone})`;
+      const folderName = `${resolvedName} (${cleanPhone})`;
       driveFolderId = await getOrCreateFolder(folderName);
     } catch (driveErr) {
       console.error('Failed to get/create Google Drive folder:', driveErr);
@@ -77,8 +99,8 @@ export async function POST(request: NextRequest) {
     // 3. Process Attachments if any
     const uploadedFiles: Array<{ id: string; url: string; name: string }> = [];
 
-    if (attachments && Array.isArray(attachments)) {
-      for (const attachment of attachments) {
+    if (resolvedAttachments && Array.isArray(resolvedAttachments)) {
+      for (const attachment of resolvedAttachments) {
         const fileUrl = attachment.url;
         const origFileName = attachment.fileName || attachment.filename || `report-${Date.now()}`;
         const mimeType = attachment.mimeType || 'application/octet-stream';
@@ -129,7 +151,7 @@ export async function POST(request: NextRequest) {
     const [appointmentRecord] = await db.insert(appointments)
       .values({
         patientId: patientId,
-        symptoms: symptoms || 'No symptoms specified.',
+        symptoms: resolvedSymptoms || notes || 'No symptoms specified.',
         status: 'pending',
         appointmentTime: new Date(Date.now() + 24 * 60 * 60 * 1000), // Default to tomorrow same time
       })
