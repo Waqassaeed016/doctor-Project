@@ -16,6 +16,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate UUID format to prevent DB errors
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(patientId)) {
+      return NextResponse.json({ error: `Invalid patientId format: "${patientId}". Must be a valid UUID.` }, { status: 400 });
+    }
+    if (!uuidRegex.test(doctorId)) {
+      return NextResponse.json({ error: `Invalid doctorId format: "${doctorId}". Please select a real doctor from the Doctors section first.` }, { status: 400 });
+    }
+
     // Insert prescription into database
     const [newPrescription] = await db.insert(prescriptions)
       .values({

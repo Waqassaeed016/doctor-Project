@@ -4,10 +4,8 @@ import { eq, desc } from 'drizzle-orm';
 import AppointmentsList from '@/components/AppointmentsList';
 
 // Fallback Mock data
-const mockDoctors = [
-  { id: 'd1', name: 'Dr. Adnan Malik', specialization: 'Cardiologist' },
-  { id: 'd2', name: 'Dr. Ayesha Ray', specialization: 'General Physician' }
-];
+// No fake IDs in mock doctors - empty list forces user to add real doctors first
+const mockDoctors: { id: string; name: string; specialization: string | null }[] = [];
 
 const mockAppointments = [
   { 
@@ -25,8 +23,8 @@ const mockAppointments = [
     id: 'a2', 
     patientName: 'Sarah Ahmed', 
     phone: '923009876543',
-    doctorId: 'd2',
-    doctorName: 'Dr. Ayesha Ray',
+    doctorId: null,
+    doctorName: null,
     appointmentTime: new Date(Date.now() + 86400000),
     status: 'approved',
     symptoms: 'Severe back pain',
@@ -62,7 +60,7 @@ async function getAppointmentsData() {
 
     return {
       appointmentsList: list,
-      doctorsList: activeDoctors.length > 0 ? activeDoctors : mockDoctors,
+      doctorsList: activeDoctors,
       isDemo: false
     };
   } catch (error) {

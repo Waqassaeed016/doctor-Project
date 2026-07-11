@@ -27,10 +27,8 @@ const mockPatient = {
   createdAt: new Date()
 };
 
-const mockDoctors = [
-  { id: 'd1', name: 'Dr. Adnan Malik', specialization: 'Cardiologist' },
-  { id: 'd2', name: 'Dr. Ayesha Ray', specialization: 'General Physician' }
-];
+const mockDoctors: { id: string; name: string; specialization: string | null }[] = [];
+// Note: No mock doctors with fake IDs - if DB has no doctors, show empty list so user adds real ones first.
 
 const mockAppointments = [
   { 
@@ -118,7 +116,7 @@ async function getPatientDetails(id: string) {
       appointmentsList: apps,
       prescriptionsList: rx,
       filesList: files,
-      doctorsList: activeDoctors.length > 0 ? activeDoctors : mockDoctors,
+      doctorsList: activeDoctors,
       isDemo: false
     };
   } catch (error) {
