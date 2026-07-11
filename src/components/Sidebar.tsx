@@ -10,7 +10,8 @@ import {
   FileHeart, 
   FolderHeart,
   Menu,
-  X
+  X,
+  Link2
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -23,6 +24,7 @@ export default function Sidebar() {
     { name: 'Patients', href: '/dashboard/patients', icon: Users },
     { name: 'Appointments', href: '/dashboard/appointments', icon: CalendarDays },
     { name: 'Doctors', href: '/dashboard/doctors', icon: UserSquare2 },
+    { name: 'Connections', href: '/dashboard/connections', icon: Link2 },
   ];
 
   return (

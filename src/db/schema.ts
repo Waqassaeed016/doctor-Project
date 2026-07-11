@@ -55,3 +55,12 @@ export const medicalFiles = pgTable('medical_files', {
   fileType: varchar('file_type', { length: 50 }), // 'image/jpeg', 'application/pdf', etc.
   uploadedAt: timestamp('uploaded_at').defaultNow().notNull(),
 });
+
+// 6. Connections Table
+export const connections = pgTable('connections', {
+  id: varchar('id', { length: 50 }).primaryKey().default('default_config'),
+  theaibotApiUrl: text('theaibot_api_url').default('https://theaibot.io'),
+  theaibotApiKey: text('theaibot_api_key'),
+  theaibotInstanceName: text('theaibot_instance_name'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
