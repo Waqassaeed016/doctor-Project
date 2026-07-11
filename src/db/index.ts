@@ -15,3 +15,18 @@ const pool = new Pool({
 
 export const db = drizzle(pool, { schema });
 export type DbClient = typeof db;
+
+// Run database migrations/initialization queries dynamically
+if (connectionString) {
+  pool.query(`
+    CREATE TABLE IF NOT EXISTS connections (
+      id VARCHAR(50) PRIMARY KEY DEFAULT 'default_config',
+      theaibot_api_url TEXT DEFAULT 'https://theaibot.io',
+      theaibot_api_key TEXT,
+      theaibot_instance_name TEXT,
+      updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    );
+  `).catch(err => {
+    console.error('Failed to run dynamic schema migration for connections table:', err);
+  });
+}
